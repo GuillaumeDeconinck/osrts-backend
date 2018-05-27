@@ -9,7 +9,7 @@ First, you need Node.js and MongoDB installed on your machine.
 ## Dependencies
 
 ### Node.js
-For installing Node.js, go to the [Node.js download page](https://nodejs.org/en/download/) and get the installer for your platform. Note that we use the LTS version which is the most stable (v6.11.0 when writing this documentation). Simply follow the instructions of the installer and it should be successfully installed.
+For installing Node.js, go to the [Node.js download page](https://nodejs.org/en/download/) and get the installer for your platform. Note that we use the LTS version which is the most stable (v8.11.2). Simply follow the instructions of the installer and it should be successfully installed.
 
 To check if it is correctly installed, open a terminal window and launch the following command:
 
