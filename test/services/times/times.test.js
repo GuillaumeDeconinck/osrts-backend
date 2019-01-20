@@ -139,7 +139,6 @@ describe('times service', () => {
           })
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             token = res.body.accessToken;
             done();
           });
@@ -152,9 +151,6 @@ describe('times service', () => {
           .send(defaultTime)
           // when finished
           .end((err, res) => {
-            if (err) {
-              console.log(res.error);
-            }
             expect(err).to.not.exist;
             expect(res.body.tag.num).to.exist;
             expect(res.statusCode).to.equal(201);
@@ -169,7 +165,6 @@ describe('times service', () => {
           .set('Authorization', 'Bearer '.concat(token))
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.body.data).to.exist;
             times = res.body.data;
@@ -184,7 +179,6 @@ describe('times service', () => {
           .set('Authorization', 'Bearer '.concat(token))
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.body.tag.num).to.exist;
             done();
@@ -200,7 +194,6 @@ describe('times service', () => {
           .send(newTime)
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             expect(res.body.checkpoint_id).to.equal(newTime.checkpoint_id);
@@ -215,7 +208,6 @@ describe('times service', () => {
           .send({ tag: { num: 4, color: 'bleu' } })
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             expect(res.body.tag.num).to.equal(4);
@@ -228,8 +220,7 @@ describe('times service', () => {
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           // when finished
-          .end((err, res) => {
-            if (err) { console.log(res.error); }
+          .end((err) => {
             expect(err).to.not.exist;
             done();
           });
@@ -304,8 +295,7 @@ describe('times service', () => {
             .set('Authorization', 'Bearer '.concat(token))
             .send(correctTime)
             // when finished
-            .end((err, res) => {
-              if (err) { console.log(res.error); }
+            .end((err) => {
               expect(err).to.not.exist;
               chai.request(URL).post('/times')
                 .set('Accept', 'application/json')

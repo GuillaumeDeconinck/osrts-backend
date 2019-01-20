@@ -57,7 +57,6 @@ describe('results service', () => {
           .set('Accept', 'application/json')
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.statusCode).to.equal(200);
             done();
@@ -130,7 +129,6 @@ describe('results service', () => {
           })
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             token = res.body.accessToken;
             done();
           });
@@ -156,7 +154,6 @@ describe('results service', () => {
           .set('Authorization', 'Bearer '.concat(token))
           // when finished
           .end((err, res) => {
-            if (err) { console.log(res.error); }
             expect(err).to.not.exist;
             expect(res.body.data).to.exist;
             done();
@@ -270,8 +267,7 @@ describe('results service', () => {
               expect(data.data[0].number).to.equal(1);
               done();
             })
-            .catch((err) => {
-              if (err) { console.log(err); }
+            .catch(() => {
               expect.fail();
               done();
             });
@@ -303,8 +299,7 @@ describe('results service', () => {
               expect(data.data[0].number).to.equal(2);
               done();
             })
-            .catch((err) => {
-              if (err) { console.log(err); }
+            .catch(() => {
               expect.fail();
               done();
             });
@@ -345,8 +340,7 @@ describe('results service', () => {
               expect(data.data[0].number).to.equal(3);
               done();
             })
-            .catch((err) => {
-              if (err) { console.log(err); }
+            .catch(() => {
               expect.fail();
               done();
             });
