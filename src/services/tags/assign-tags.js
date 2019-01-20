@@ -3,54 +3,54 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 const Q = require('q');
 const auth = require('@feathersjs/authentication');
-
 const moment = require('moment');
+const tagsModel = require('./tag-model');
+const runnersModel = require('../runners/runner-model');
+const wavesModel = require('../waves/wave-model');
+
 require('moment/locale/fr');
+
 moment.locale('fr');
 
-module.exports = function () {
-  const app = this;
-
-  const tagsModel = require('./tag-model');
-  const tagsService = app.service('/tags');
-  const runnersModel = require('../runners/runner-model');
-  const runnersService = app.service('/runners');
-  const wavesModel = require('../waves/wave-model');
-  const raceService = app.service('/race');
-
+module.exports = (app) => {
   class TagsAssigner {
-
     create(data, params, callback) {
-      var race = null;
-      var runners = [];
-      var tags = [];
-      var waves = [];
+      const tagsService = this.app.service('/tags');
+      const runnersService = this.app.service('/runners');
+      const raceService = this.app.service('/race');
+
+      let runners = [];
+      let tags = [];
+      let waves = [];
       // Promises array and calls to find()
-      var promisesArray = [];
-      //var promiseRace = raceService.find({});
-      //promisesArray.push(promiseRace);
-      var promiseTags = tagsModel.find({}).sort({ color: 1, num: 1 });
+      const promisesArray = [];
+      // var promiseRace = raceService.find({});
+      // promisesArray.push(promiseRace);
+      const promiseTags = tagsModel.find({}).sort({ color: 1, num: 1 });
       promisesArray.push(promiseTags);
-      var deferred = Q.defer();
+      const deferred = Q.defer();
       promisesArray.push(deferred.promise);
-      var promiseWaves = wavesModel.find({ chrono: true }).sort({ date: 1, num: 1 });
+      const promiseWaves = wavesModel.find({ chrono: true }).sort({ date: 1, num: 1 });
       promisesArray.push(promiseWaves);
 
       // Promises to get the data
-      //promiseRace.then((raceRetrieved)=>{race = raceRetrieved.data[0]; console.log(raceRetrieved[0]);});
+      // promiseRace.then((raceRetrieved)=>
+      // {race = raceRetrieved.data[0]; console.log(raceRetrieved[0]);});
       promiseTags.then((tagsRetrieved) => { tags = tagsRetrieved; });
       promiseWaves.then((wavesRetrieved) => {
         waves = wavesRetrieved;
-        var arrayNums = [];
+        const arrayNums = [];
         waves.forEach((wave) => {
           arrayNums.push(wave.num);
         });
-        // We query the runners here so that we only get the runners inside waves that have "chrono" equals to true
-        var promiseRunners = runnersModel.find({ wave_id: { $in: arrayNums } }).sort({ date: 1, wave_id: 1, team_name: 1, name: 1 });
+        // We query the runners here so that we only get the runners
+        // inside waves that have "chrono" equals to true
+        const promiseRunners = runnersModel.find({ wave_id: { $in: arrayNums } }).sort({
+          date: 1, wave_id: 1, team_name: 1, name: 1,
+        });
         promiseRunners.then((runnersRetrieved) => {
           runners = runnersRetrieved;
           deferred.resolve(runners);
@@ -59,28 +59,35 @@ module.exports = function () {
         });
       });
       // Wait that all the promises are finished (in other words, that we get all the data needed)
-      Q.allSettled(promisesArray).then((results) => {
-        var indexTags = 0;
-        var indexRunners = 0;
-        var currentColor = tags[0].color;
-        var currentDate = runners[0].date;
-        var onePassDone = false;
+      Q.allSettled(promisesArray).then(() => {
+        let indexTags = 0;
+        let indexRunners = 0;
+        let currentColor = tags[0].color;
+        let currentDate = runners[0].date;
+        let onePassDone = false;
         while (indexTags < tags.length && indexRunners < runners.length) {
-          var tag = tags[indexTags];
-          var runner = runners[indexRunners];
-          if ((tag.color === currentColor && runner.date !== currentDate && !onePassDone) || (tag.assigned && onePassDone)) {
-            indexTags++;
+          const tag = tags[indexTags];
+          const runner = runners[indexRunners];
+          if (
+            (tag.color === currentColor && runner.date !== currentDate && !onePassDone)
+            || (tag.assigned && onePassDone)
+          ) {
+            indexTags += 1;
             continue;
           } else if (tag.color !== currentColor && runner.date !== currentDate) {
             currentColor = tag.color;
             currentDate = runner.date;
           }
           tag.assigned = true;
-          tagsService.update(tag._id, tag).then(data => { }).catch(error => { console.log(error); });
+          tagsService.update(tag._id, tag)
+            .then(() => { })
+            .catch((error) => { console.log(error); });
           runner.tag = { num: tag.num, color: tag.color };
-          runnersService.update(runner._id, runner).then(data => { }).catch(error => { console.log(error); });
-          indexTags++;
-          indexRunners++;
+          runnersService.update(runner._id, runner)
+            .then(() => { })
+            .catch((error) => { console.log(error); });
+          indexTags += 1;
+          indexRunners += 1;
           if (indexTags === tags.length && !onePassDone) {
             indexTags = 0;
             onePassDone = true;
@@ -93,8 +100,8 @@ module.exports = function () {
     // END OF ASSIGN
 
     // Setup this service, needed by Feathersjs
-    setup(app) {
-      this.app = app;
+    setup(appToSave) {
+      this.app = appToSave;
     }
   }
 
@@ -104,7 +111,6 @@ module.exports = function () {
   app.service('/tags-assigner').hooks({
     before: {
       all: [auth.hooks.authenticate('local')],
-    }
+    },
   });
-
 };

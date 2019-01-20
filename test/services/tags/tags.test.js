@@ -2,36 +2,33 @@
  * @summary Race timing system
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
-
-'use strict';
+/* eslint no-unused-expressions: 0 */
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect = chai.expect;
-const io = require('socket.io-client');
 const app = require('../../../src/app');
+
+const { expect } = chai;
+
 const User = app.service('users');
 const Tags = app.service('tags');
 chai.use(chaiHttp);
 
-var token;
-const URL = 'http://' + app.settings.host + ':' + app.settings.port;
+const URL = `http://${app.settings.host}:${app.settings.port}`;
 
 const defaultTagsRange = { from: 1, to: 10, color: 'bleu' };
 
 describe('tags service', () => {
-
   it('registered the tags service', () => {
     expect(app.service('tags')).to.be.ok;
   });
 
   describe('testing with REST', () => {
-
-    before(function (done) {
+    before((done) => {
       User.create({
-        'email': 'admin@shouldexist.com',
-        'password': 'azerty9'
-      }).then(res => {
+        email: 'admin@shouldexist.com',
+        password: 'azerty9',
+      }).then(() => {
         Tags.remove(null).then(() => {
           done();
         });
@@ -43,14 +40,13 @@ describe('tags service', () => {
     /* ############################# */
 
     describe('without being authenticated', () => {
-
       it('should not create the tags (not logged in)', (done) => {
         chai.request(URL).post('/tags')
           .set('Accept', 'application/json')
           .send(defaultTagsRange)
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
@@ -59,55 +55,55 @@ describe('tags service', () => {
       it('should not find the tags (not logged in)', (done) => {
         chai.request(URL).get('/tags')
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not get the tag (not logged in)', (done) => {
-        chai.request(URL).get('/tags/' + 1)
+        chai.request(URL).get(`/tags/${1}`)
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not update a tag (not logged in)', (done) => {
-        chai.request(URL).put('/tags/' + 1)
+        chai.request(URL).put(`/tags/${1}`)
           .set('Accept', 'application/json')
           .send({ num: 1, assigned: true })
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not patch a tag (not logged in)', (done) => {
-        chai.request(URL).patch('/tags/' + 1)
+        chai.request(URL).patch(`/tags/${1}`)
           .set('Accept', 'application/json')
           .send({ assigned: true })
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not delete the tag (not logged in)', (done) => {
-        chai.request(URL).delete('/tags/' + 1)
+        chai.request(URL).delete(`/tags/${1}`)
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
@@ -119,24 +115,21 @@ describe('tags service', () => {
     /* ############################# */
 
     describe('while being authenticated', () => {
+      let token;
+      let tags;
 
-      var token;
-      var tags;
-
-      before(function (done) {
+      before((done) => {
         chai.request(URL).post('/authentication')
-          //set header
+          // set header
           .set('Accept', 'application/json')
-          //send credentials
+          // send credentials
           .send({
-            'strategy': 'local',
-            'email': 'admin@shouldexist.com',
-            'password': 'azerty9'
+            strategy: 'local',
+            email: 'admin@shouldexist.com',
+            password: 'azerty9',
           })
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             token = res.body.accessToken;
             done();
           });
@@ -147,10 +140,8 @@ describe('tags service', () => {
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           .send(defaultTagsRange)
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             expect(err).to.not.exist;
             expect(res.body).to.have.lengthOf(defaultTagsRange.to);
             expect(res.statusCode).to.equal(201);
@@ -163,10 +154,8 @@ describe('tags service', () => {
         chai.request(URL).get('/tags')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             expect(err).to.not.exist;
             expect(res.body.data).to.exist;
             tags = res.body.data;
@@ -176,13 +165,11 @@ describe('tags service', () => {
 
 
       it('should get a tag', (done) => {
-        chai.request(URL).get('/tags/' + tags[0]._id)
+        chai.request(URL).get(`/tags/${tags[0]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             expect(err).to.not.exist;
             expect(res.body.num).to.exist;
             done();
@@ -190,16 +177,14 @@ describe('tags service', () => {
       });
 
       it('should update a tag', (done) => {
-        var newTag = Object.assign({}, tags[0]);
+        const newTag = Object.assign({}, tags[0]);
         newTag.assigned = true;
-        chai.request(URL).put('/tags/' + newTag._id)
+        chai.request(URL).put(`/tags/${newTag._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           .send(newTag)
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             expect(res.body.assigned).to.equal(newTag.assigned);
@@ -208,14 +193,12 @@ describe('tags service', () => {
       });
 
       it('should patch a tag', (done) => {
-        chai.request(URL).patch('/tags/' + tags[1]._id)
+        chai.request(URL).patch(`/tags/${tags[1]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           .send({ assigned: true })
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             expect(res.body.assigned).to.equal(true);
@@ -224,30 +207,25 @@ describe('tags service', () => {
       });
 
       it('should delete a tag', (done) => {
-        chai.request(URL).delete('/tags/' + tags[0]._id)
+        chai.request(URL).delete(`/tags/${tags[0]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
-          .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
+          // when finished
+          .end((err) => {
             expect(err).to.not.exist;
             done();
           });
       });
-
     });
     // END WITH BEING AUTHENTICATED
 
-    after(function (done) {
+    after((done) => {
       User.remove(null).then(() => {
         Tags.remove(null).then(() => {
           done();
         });
       });
     });
-
   });
   // END WITH REST
-
 });

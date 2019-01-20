@@ -3,7 +3,7 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
+const mongoose = require('mongoose');
 const results = require('./results');
 const race = require('./race');
 const runners = require('./runners');
@@ -18,13 +18,11 @@ const tags = require('./tags');
 const assignTags = require('./tags/assign-tags');
 const authentication = require('./authentication');
 const user = require('./user');
-const mongoose = require('mongoose');
 
-module.exports = function() {
-  const app = this;
 
+module.exports = (app) => {
   mongoose.Promise = global.Promise;
-  mongoose.connect(app.get('mongodb'), { useMongoClient: true });
+  mongoose.connect(app.get('mongodb'), { useNewUrlParser: true, useCreateIndex: true });
 
   app.configure(authentication);
   app.configure(user);

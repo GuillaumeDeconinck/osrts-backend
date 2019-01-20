@@ -3,22 +3,20 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 const service = require('feathers-mongoose');
 const time = require('./time-model');
 const hooks = require('./hooks');
 
-module.exports = function () {
-  const app = this;
-
+module.exports = (app) => {
   const options = {
     Model: time,
     lean: true,
     paginate: {
       default: 10,
-      max: 25
-    }
+      max: 25,
+    },
+    multi: true,
   };
 
   // Initialize our service with any options it requires
@@ -27,14 +25,14 @@ module.exports = function () {
   // Get our initialize service to that we can bind hooks
   const timesService = app.service('/times');
 
-  /*app.service('results').create({
+  /* app.service('results').create({
     name: "test",
     team_name: "test",
     path: 1,
     time: "Not a time but don't care"
   }).then(function(result) {
     console.log('Created result', result);
-  });*/
+  }); */
 
   // Set up our before hooks
   timesService.hooks(hooks);

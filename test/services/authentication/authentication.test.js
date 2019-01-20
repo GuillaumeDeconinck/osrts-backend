@@ -3,22 +3,22 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
+/* eslint no-unused-expressions: 0 */
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect = chai.expect;
-const io = require('socket.io-client');
 const app = require('../../../src/app');
+
+const { expect } = chai;
+
 const User = app.service('users');
-const Authentication = app.service('authentication');
+// const Authentication = app.service('authentication');
 chai.use(chaiHttp);
 
-var token;
-const URL = "http://" + app.settings.host + ":" + app.settings.port;
+// let token;
+const URL = `http://${app.settings.host}:${app.settings.port}`;
 
 describe('user service', () => {
-
   it('registered the users service', () => {
     expect(app.service('users')).to.be.ok;
   });
@@ -28,31 +28,28 @@ describe('user service', () => {
   });
 
   describe('authentication with REST', () => {
-
-    before(function (done) {
+    before((done) => {
       User.create({
-        'email': 'admin@shouldexist.com',
-        'password': 'azerty9'
-      }).then(res => {
+        email: 'admin@shouldexist.com',
+        password: 'azerty9',
+      }).then(() => {
         done();
       });
     });
 
     it('should not authenticate (wrong password)', (done) => {
       chai.request(URL).post('/authentication')
-        //set header
+        // set header
         .set('Accept', 'application/json')
-        //send credentials
+        // send credentials
         .send({
-          'strategy': 'local',
-          'email': 'admin@shouldnotexist.com',
-          'password': 'wtf'
+          strategy: 'local',
+          email: 'admin@shouldnotexist.com',
+          password: 'wtf',
         })
-        //when finished
+        // when finished
         .end((err, res) => {
-          /*if(err)
-            console.log(err.response.error);*/
-          expect(err).to.exist;
+          expect(res).to.exist;
           expect(res.body.accessToken).to.not.exist;
           expect(res.statusCode).to.equal(401);
           done();
@@ -60,29 +57,26 @@ describe('user service', () => {
     });
 
     it('should authenticate successfully', (done) => {
-
-      //setup a request to get authentication token
+      // setup a request to get authentication token
       chai.request(URL).post('/authentication')
-        //set header
+        // set header
         .set('Accept', 'application/json')
-        //send credentials
+        // send credentials
         .send({
-          'strategy': 'local',
-          'email': 'admin@shouldexist.com',
-          'password': 'azerty9'
+          strategy: 'local',
+          email: 'admin@shouldexist.com',
+          password: 'azerty9',
         })
-        //when finished
+        // when finished
         .end((err, res) => {
-          if (err)
-            console.log(err.response.error);
           expect(res.body.accessToken).to.exist;
-          token = res.body.accessToken;
+          // token = res.body.accessToken;
           done();
         });
     });
 
 
-    after(function (done) {
+    after((done) => {
       User.remove(null).then(() => {
         done();
       });
@@ -90,7 +84,7 @@ describe('user service', () => {
   });
 
 
-  /*describe('authentication with socket', ()=>{
+  /* describe('authentication with socket', ()=>{
     var socket;
 
     before(function(done){
@@ -128,7 +122,8 @@ describe('user service', () => {
             console.log('disconnecting...');
             socket.disconnect();
         } else {
-            // There will not be a connection unless you have done() in beforeEach, socket.on('connect'...)
+            // There will not be a connection unless you have done() in beforeEach,
+            // socket.on('connect'...)
             console.log('no connection to break...');
         }
         done();
@@ -153,6 +148,5 @@ describe('user service', () => {
        });
     });
 
-  });*/
-
+  }); */
 });

@@ -3,15 +3,15 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect =  chai.expect;
 const app = require('../src/app');
+
+const { expect } = chai;
 chai.use(chaiHttp);
 
-const URL = 'http://'+app.settings.host+':'+app.settings.port;
+const URL = `http://${app.settings.host}:${app.settings.port}`;
 
 describe('Feathers application tests', () => {
   before((done) => {
@@ -23,7 +23,7 @@ describe('Feathers application tests', () => {
     this.server.close(done);
   });
 
-  it('starts and shows the index page', done => {
+  it('starts and shows the index page', (done) => {
     chai.request(URL).get('/').end((err, res) => {
       expect(res.text.indexOf('<body>')).to.not.equal(-1);
       done();
@@ -31,7 +31,7 @@ describe('Feathers application tests', () => {
   });
 
   describe('404', () => {
-    it('sends a 404 error', done => {
+    it('sends a 404 error', (done) => {
       chai.request(URL).get('/path/to/nowhere/shoud/not/be/saved').end((err, res) => {
         expect(res.statusCode).to.equal(404);
         done();
@@ -39,10 +39,11 @@ describe('Feathers application tests', () => {
     });
   });
 
-/* ###################################### */
-/* ######## OTHER TEST FILES ############ */
-/* ###################################### */
+  /* ###################################### */
+  /* ######## OTHER TEST FILES ############ */
+  /* ###################################### */
 
+  /* eslint global-require: 0 */
   require('./services/authentication/authentication.test.js');
   require('./services/users/users.test.js');
   require('./services/race/race.test.js');
@@ -52,5 +53,4 @@ describe('Feathers application tests', () => {
   require('./services/tags/tags.test.js');
   require('./services/times/times.test.js');
   require('./services/results/results.test.js');
-
 });

@@ -3,7 +3,6 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 // runner-model.js - A mongoose model
 //
@@ -11,18 +10,19 @@
 // for more of what you can do here.
 
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const runnerSchema = new Schema({
-  name: {type: String, required: true},
+  name: { type: String, required: true },
   gender: { type: String, required: true },
-  age: { type: Number},
-  date: {type: String, required: true },
-  team_id: {type: Number},
-  team_name: {type: String},
-  type: {type: String},
-  wave_id: {type: Number},
-  tag: {type: Schema.Types.Mixed}
+  age: { type: Number },
+  date: { type: String, required: true },
+  team_id: { type: Number },
+  team_name: { type: String },
+  type: { type: String },
+  wave_id: { type: Number },
+  tag: { type: Schema.Types.Mixed },
 });
 
 const runnerModel = mongoose.model('runners', runnerSchema);

@@ -3,9 +3,6 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
-
-const globalHooks = require('../../../hooks');
 const hooks = require('feathers-hooks-common');
 const auth = require('@feathersjs/authentication');
 const resetAll = require('./reset-all');
@@ -18,7 +15,7 @@ exports.before = {
   update: [auth.hooks.authenticate(['jwt', 'local'])],
   create: [auth.hooks.authenticate(['jwt', 'local']), checkOnlyOneExists],
   patch: [auth.hooks.authenticate(['jwt', 'local'])],
-  remove: [hooks.disallow()]
+  remove: [hooks.disallow()],
 };
 
 exports.after = {
@@ -28,5 +25,5 @@ exports.after = {
   create: [],
   update: [resetAll],
   patch: [],
-  remove: []
+  remove: [],
 };

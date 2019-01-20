@@ -3,17 +3,14 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
-const Q = require('q');
+// const Q = require('q');
 const auth = require('@feathersjs/authentication');
-var csv = require('fast-csv');
+const csv = require('fast-csv');
 
-module.exports = function () {
-  const app = this;
+module.exports = (app) => {
   const timesService = app.service('/times');
   class TimesParser {
-
     constructor() {
       this.events = ['status'];
       this.step = 0;
@@ -22,12 +19,12 @@ module.exports = function () {
 
     create(dataCreate, params, callback) {
       // Reading txt
-      var data = new Uint8Array(dataCreate);
-      var arr = [];
-      for (var i = 0; i !== data.length; ++i) {
+      const data = new Uint8Array(dataCreate);
+      const arr = [];
+      for (let i = 0; i !== data.length; i += 1) {
         arr[i] = String.fromCharCode(data[i]);
       }
-      var bstr = arr.join('');
+      const bstr = arr.join('');
 
       // Define the step and nbSteps to show some progression on the frontend
       this.step = 0;
@@ -36,53 +33,49 @@ module.exports = function () {
       // Return the request to say that it is successfully processing the excel
       callback(null, {
         status: 'success',
-        nbSteps: this.nbSteps
+        nbSteps: this.nbSteps,
       });
       // Precise the current status
       this.incrementAndEmitStatus();
 
-      var times = [];
-      var csvStream = csv.fromString(bstr).on('data', (data) => {
-        var time = {
-          checkpoint_id: data[0],
+      const times = [];
+      csv.fromString(bstr).on('data', (data2) => {
+        const time = {
+          checkpoint_id: data2[0],
           tag: {
-            num: data[1],
-            color: data[2]
+            num: data2[1],
+            color: data2[2],
           },
-          timestamp: data[3]
+          timestamp: data2[3],
         };
 
         times.push(time);
       }).on('end', () => {
-
         // Sequential creation to avoid integrity errors
-        var promise = Promise.resolve(null);
+        let promise = Promise.resolve(null);
         times.forEach((value) => {
-          console.log(value);
-          promise = promise.then(() => {
-            return timesService.create(value);
-          }).then(() => {
-            console.log('Success');
+          promise = promise.then(() => timesService.create(value)).then(() => {
             this.incrementAndEmitStatus();
           }).catch((err) => {
-            console.log('Error : ' + err.message);
+            console.log(`Error : ${err.message}`);
             this.incrementAndEmitStatus();
           });
         });
       });
     }
+
     // END OF PARSING
     incrementAndEmitStatus() {
-      this.step++;
+      this.step += 1;
       this.emit('status', {
         step: this.step,
-        nbSteps: this.nbSteps
+        nbSteps: this.nbSteps,
       });
     }
 
     // Setup this service, needed by Feathersjs
-    setup(app) {
-      this.app = app;
+    setup(appToSave) {
+      this.app = appToSave;
     }
   }
 

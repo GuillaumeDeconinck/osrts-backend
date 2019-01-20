@@ -3,22 +3,20 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 const service = require('feathers-mongoose');
 const runner = require('./runner-model');
 const hooks = require('./hooks');
 
-module.exports = function() {
-  const app = this;
-
+module.exports = (app) => {
   const options = {
     Model: runner,
     lean: true,
     paginate: {
       default: 10,
-      max: 25
-    }
+      max: 25,
+    },
+    multi: true,
   };
 
   // Initialize our service with any options it requires

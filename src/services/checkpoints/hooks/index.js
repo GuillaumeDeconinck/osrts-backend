@@ -3,9 +3,6 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
-
-const globalHooks = require('../../../hooks');
 const auth = require('@feathersjs/authentication');
 const countTimes = require('./count-times');
 
@@ -16,7 +13,7 @@ exports.before = {
   create: [auth.hooks.authenticate(['jwt', 'local'])],
   update: [auth.hooks.authenticate(['jwt', 'local'])],
   patch: [auth.hooks.authenticate(['jwt', 'local'])],
-  remove: [auth.hooks.authenticate(['jwt', 'local'])]
+  remove: [auth.hooks.authenticate(['jwt', 'local'])],
 };
 
 exports.after = {
@@ -26,5 +23,5 @@ exports.after = {
   create: [],
   update: [],
   patch: [countTimes],
-  remove: []
+  remove: [],
 };

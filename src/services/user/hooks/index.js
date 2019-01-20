@@ -3,11 +3,9 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
-const globalHooks = require('../../../hooks');
 const hooks = require('feathers-hooks-common');
-const {iff, isProvider} = require('feathers-hooks-common');
+const { iff, isProvider } = require('feathers-hooks-common');
 const auth = require('@feathersjs/authentication');
 const local = require('@feathersjs/authentication-local');
 const atLeastOneAdmin = require('./at-least-one-admin');
@@ -28,5 +26,5 @@ exports.after = {
   create: [],
   update: [],
   patch: [],
-  remove: []
+  remove: [],
 };

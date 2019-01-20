@@ -3,10 +3,9 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
-const globalHooks = require('../../../hooks');
 const auth = require('@feathersjs/authentication');
+// const globalHooks = require('../../../hooks');
 const updateRunners = require('./update-runners');
 
 exports.before = {
@@ -16,7 +15,7 @@ exports.before = {
   create: [],
   update: [],
   patch: [],
-  remove: [updateRunners]
+  remove: [updateRunners],
 };
 
 exports.after = {
@@ -26,5 +25,5 @@ exports.after = {
   create: [],
   update: [],
   patch: [],
-  remove: []
+  remove: [],
 };

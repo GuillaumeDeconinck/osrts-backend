@@ -3,13 +3,14 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
-
 const app = require('./app');
+
 const port = app.get('port');
 const server = app.listen(port);
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 server.on('listening', () => {
   console.log(`Feathers application started on ${app.get('host')}:${port}`);
-  console.log(`Started in ${process.env.NODE_ENV}`);
+  console.log(`Env: ${nodeEnv}`);
 });

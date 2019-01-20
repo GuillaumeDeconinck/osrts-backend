@@ -2,25 +2,23 @@
  * @summary Race timing system
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
-
-'use strict';
+/* eslint no-unused-expressions: 0 */
 
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect = chai.expect;
-const io = require('socket.io-client');
 const app = require('../../../src/app');
+
+const { expect } = chai;
+
 const User = app.service('users');
-const Authentication = app.service('authentication');
+// const Authentication = app.service('authentication');
 chai.use(chaiHttp);
 
-var token;
-const URL = "http://" + app.settings.host + ":" + app.settings.port;
+const URL = `http://${app.settings.host}:${app.settings.port}`;
 
 const defaultUsers = {};
 
 describe('user service', () => {
-
   it('registered the users service', () => {
     expect(app.service('users')).to.be.ok;
   });
@@ -30,12 +28,11 @@ describe('user service', () => {
   });
 
   describe('testing with REST', () => {
-
-    before(function (done) {
+    before((done) => {
       User.create({
-        'email': 'admin@shouldexist.com',
-        'password': 'azerty9'
-      }).then(res => {
+        email: 'admin@shouldexist.com',
+        password: 'azerty9',
+      }).then(() => {
         done();
       });
     });
@@ -45,14 +42,13 @@ describe('user service', () => {
     /* ############################# */
 
     describe('without being authenticated', () => {
-
       it('should not create the users (disabled on external)', (done) => {
         chai.request(URL).post('/users')
           .set('Accept', 'application/json')
           .send(defaultUsers)
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
@@ -61,55 +57,55 @@ describe('user service', () => {
       it('should find the users (not logged in)', (done) => {
         chai.request(URL).get('/users')
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not get the user (not logged in)', (done) => {
-        chai.request(URL).get('/users/' + 1)
+        chai.request(URL).get(`/users/${1}`)
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not update a user (disabled on external)', (done) => {
-        chai.request(URL).put('/users/' + 1)
+        chai.request(URL).put(`/users/${1}`)
           .set('Accept', 'application/json')
           .send(defaultUsers)
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not patch a user (disabled on external)', (done) => {
-        chai.request(URL).patch('/users/' + 1)
+        chai.request(URL).patch(`/users/${1}`)
           .set('Accept', 'application/json')
           .send(defaultUsers)
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should not delete the user (disabled on external)', (done) => {
-        chai.request(URL).delete('/users/' + 1)
+        chai.request(URL).delete(`/users/${1}`)
           .set('Accept', 'application/json')
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
@@ -121,26 +117,24 @@ describe('user service', () => {
     /* ############################# */
 
     describe('while being authenticated', () => {
+      let token;
+      let users;
 
-      var token;
-      var users;
+      const newUser = { email: 'test@test.test', password: 'test' };
 
-      var newUser = { email: "test@test.test", password: "test" };
-
-      before(function (done) {
+      before((done) => {
         chai.request(URL).post('/authentication')
-          //set header
+          // set header
           .set('Accept', 'application/json')
-          //send credentials
+          // send credentials
           .send({
-            'strategy': 'local',
-            'email': 'admin@shouldexist.com',
-            'password': 'azerty9'
+            strategy: 'local',
+            email: 'admin@shouldexist.com',
+            password: 'azerty9',
           })
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
+            if (err) { console.log(err.response.error); }
             token = res.body.accessToken;
             done();
           });
@@ -151,7 +145,7 @@ describe('user service', () => {
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           .send(newUser)
-          //when finished
+          // when finished
           .end((err, res) => {
             expect(err).to.not.exist;
             expect(res.body).to.exist;
@@ -164,7 +158,7 @@ describe('user service', () => {
         chai.request(URL).get('/users')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
             expect(err).to.not.exist;
             expect(res.body.data).to.exist;
@@ -175,10 +169,10 @@ describe('user service', () => {
 
 
       it('should get a user', (done) => {
-        chai.request(URL).get('/users/' + users[1]._id)
+        chai.request(URL).get(`/users/${users[1]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
             expect(err).to.not.exist;
             expect(res.body).to.exist;
@@ -187,28 +181,25 @@ describe('user service', () => {
       });
 
       it('should not update a user (disabled on external)', (done) => {
-        chai.request(URL).put('/users/' + users[1]._id)
+        chai.request(URL).put(`/users/${users[1]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
           .send(defaultUsers)
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.be.within(400, 499);
             done();
           });
       });
 
       it('should patch a user', (done) => {
-        chai.request(URL).patch('/users/' + users[1]._id)
+        chai.request(URL).patch(`/users/${users[1]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          .send({ name: "test" })
-          //when finished
+          .send({ name: 'test' })
+          // when finished
           .end((err, res) => {
-            if (err) {
-              console.log(err.response.error);
-            }
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             done();
@@ -216,72 +207,67 @@ describe('user service', () => {
       });
 
       it('should delete a user', (done) => {
-        chai.request(URL).delete('/users/' + users[1]._id)
+        chai.request(URL).delete(`/users/${users[1]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
             expect(err).to.not.exist;
             expect(res.body).to.exist;
             done();
           });
       });
-
     });
     // END WITH BEING AUTHENTICATED
 
     describe('on hook atLeastOneAdmin', () => {
+      let token;
+      let users;
 
+      // const newUser = { email: 'test@test.test', password: 'test' };
 
-      var token;
-      var users;
-
-      var newUser = { email: "test@test.test", password: "test" };
-
-      before(function (done) {
+      before((done) => {
         chai.request(URL).post('/authentication')
-          //set header
+          // set header
           .set('Accept', 'application/json')
-          //send credentials
+          // send credentials
           .send({
-            'strategy': 'local',
-            'email': 'admin@shouldexist.com',
-            'password': 'azerty9'
+            strategy: 'local',
+            email: 'admin@shouldexist.com',
+            password: 'azerty9',
           })
-          //when finished
+          // when finished
           .end((err, res) => {
-            if (err)
-              console.log(err.response.error);
+            if (err) { console.log(err.response.error); }
             token = res.body.accessToken;
             chai.request(URL).get('/users')
               .set('Accept', 'application/json')
               .set('Authorization', 'Bearer '.concat(token))
-              //when finished
-              .end((err, res) => {
-                users = res.body.data;
+              // when finished
+              .end((err2, res2) => {
+                users = res2.body.data;
                 done();
               });
           });
       });
 
       it('should not delete the last admin', (done) => {
-        chai.request(URL).delete('/users/' + users[0]._id)
+        chai.request(URL).delete(`/users/${users[0]._id}`)
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(token))
-          //when finished
+          // when finished
           .end((err, res) => {
-            expect(err.response.error).to.exist;
+            expect(res.error).to.exist;
             expect(res.statusCode).to.equal(500);
             done();
           });
       });
     });
 
-    after(function (done) {
+    after((done) => {
       User.remove(null).then(() => {
         done();
       });
     });
   });
-
 });

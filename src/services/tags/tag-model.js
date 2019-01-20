@@ -3,7 +3,6 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
 // tag-model.js - A mongoose model
 //
@@ -11,12 +10,13 @@
 // for more of what you can do here.
 
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 
 const tagSchema = new Schema({
   num: { type: Number, required: true },
   color: { type: String, required: true },
-  assigned: { type: Boolean, 'default': false }
+  assigned: { type: Boolean, default: false },
 });
 
 tagSchema.index({ num: 1, color: 1 }, { unique: true });

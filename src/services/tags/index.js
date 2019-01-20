@@ -3,47 +3,45 @@
  * @author Guillaume Deconinck & Wojciech Grynczel
 */
 
-'use strict';
 
-const Service = require('feathers-mongoose').Service;
+const { Service } = require('feathers-mongoose');
 const tag = require('./tag-model');
 const race = require('../race/race-model');
 const hooks = require('./hooks');
 
-module.exports = function () {
-  const app = this;
-
+module.exports = (app) => {
   const options = {
     Model: tag,
     lean: true,
     paginate: {
       default: 10,
-      max: 25
-    }
+      max: 25,
+    },
+    multi: true,
   };
 
   class CustomServiceForTags extends Service {
-    create(data, params) {
+    create(data) {
       if (data && data.from && data.color) {
         if (data.to && data.to > 0 && data.to > data.from) {
-          var tagsArray = [];
-          for (var i = data.from; i <= data.to; i++) {
+          const tagsArray = [];
+          for (let i = data.from; i <= data.to; i += 1) {
             tagsArray.push({ num: i, color: data.color });
           }
           race.update(null, { $addToSet: { tagsColor: data.color } }).exec();
-          return tag.create(tagsArray).then((data) => {
-            data.forEach((tag) => {
-              this.emit('created', tag);
+          return tag.create(tagsArray).then((data2) => {
+            data2.forEach((tag2) => {
+              this.emit('created', tag2);
             });
-            return data;
-          });
-        } else {
-          return tag.create({ num: data.from, color: data.color }).then((tag) => {
-            this.emit('created', tag);
-            return tag;
+            return data2;
           });
         }
+        return tag.create({ num: data.from, color: data.color }).then((tag2) => {
+          this.emit('created', tag2);
+          return tag2;
+        });
       }
+      return undefined;
     }
   }
 
